@@ -156,7 +156,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* adcHandle){// end of DMA
 	fM_VOUT1 = (*pM_VOUT1) *mvFactor1;	// ADC1 IN11 test at P20 -- OK
 	fM_VOUT2 = (*pM_VOUT2) *mvFactor1;	// test at P18 -- OK
 	fM_Temp = ((*TEMP30_CAL_ADDR) - (*pM_Temp)) * 80.0f / ((*TEMP30_CAL_ADDR) - (*TEMP110_CAL_ADDR)) + 30;
-	HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, (*pM_VOUT2) > 1700 ? GPIO_PIN_SET : GPIO_PIN_RESET);
 	doStat(*pM_Temp);
 	fM_Vref = (*pM_Vref) * mvFactor0;
 	// ADC2
