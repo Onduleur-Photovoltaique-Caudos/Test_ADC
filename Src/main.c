@@ -146,7 +146,7 @@ void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef* adcHandle)
 {
 	HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET); 
 }
-
+volatile static bool doneADC;
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* adcHandle){// end of DMA
 	HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_SET);   // Pin 5 of serial connector
 	g_MeasurementNumber++;
@@ -167,9 +167,23 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* adcHandle){// end of DMA
 	fM_I175 = (*pM_I175) *iFactor;		// test at P10 pin2 range 5V --OK
 	fM_I225 = (*pM_I225) *iFactor;		// test at P9 pin2 range 5V -- OK
 	HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_RESET);
-
+	doneADC = true;
 }
 
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if (htim == &htim2){
+		if (doneADC){
+			doneADC = false;
+			HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_SET);
+			delay_us_DWT(1);
+			HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_RESET);
+			return;
+		}
+		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_RESET);
+	}
+}
 
 /* USER CODE END 0 */
 
@@ -222,8 +236,8 @@ int main(void)
 	//HAL_TIM_OC_Start(&htim3, TIM_CHANNEL_1);
 	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_3);
 	//HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);   // sync pulse on the P8 connector
-	HAL_TIM_OC_Start(&htim2, TIM_CHANNEL_3);     // sync pulse on the P8 connector
-	HAL_TIM_OC_Start(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_OC_Start(&htim2, TIM_CHANNEL_3);      // sync pulse on the P8 connector
 
 	setTempThreshold(45);
 	HAL_ADC_Start(&hadc2);
