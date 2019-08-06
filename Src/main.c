@@ -172,15 +172,28 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* adcHandle){// end of DMA
 
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if (htim == &htim2){
-		if (doneADC){
+	if (htim == &htim2) {
+		if (doneADC) {
 			doneADC = false;
 			HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_SET);
-			delay_us_DWT(1);
+			delay_us_DWT(0);
 			HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_RESET);
 			return;
 		}
 		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_RESET);
+	} else if (htim == &htim3){
+		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_SET);
+		delay_us_DWT(1);
+		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_RESET);
+	}
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if (htim == &htim3) {
+		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_SET);
+		delay_us_DWT(1);
 		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_RESET);
 	}
 }
@@ -234,14 +247,14 @@ int main(void)
 	HAL_ADCEx_Calibration_Start(&hadc2, ADC_SINGLE_ENDED);
 	HAL_Delay(2);
 	//HAL_TIM_OC_Start(&htim3, TIM_CHANNEL_1);
-	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_3);
+	HAL_TIM_OC_Start(&htim3, TIM_CHANNEL_3);
 	//HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);   // sync pulse on the P8 connector
 	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
 	HAL_TIM_OC_Start(&htim2, TIM_CHANNEL_3);      // sync pulse on the P8 connector
 
 	setTempThreshold(45);
 	HAL_ADC_Start(&hadc2);
-	HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) g_ADCBufferM, ADC_BUFFERM_LENGTH * 2);
+	HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*) g_ADCBufferM, ADC_BUFFERM_LENGTH);
   /* USER CODE END 2 */
 
   /* Infinite loop */
