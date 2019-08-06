@@ -184,16 +184,16 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_RESET);
 	} else if (htim == &htim3){
 		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_SET);
-		delay_us_DWT(1);
+		//delay_us_DWT(1);
 		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_RESET);
 	}
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if (htim == &htim3) {
+	if (htim == &htim2) {
 		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_SET);
-		delay_us_DWT(1);
+		delay_us_DWT(0);
 		HAL_GPIO_WritePin(Sync_GPIO_Port, Sync_Pin, GPIO_PIN_RESET);
 	}
 }
@@ -250,6 +250,7 @@ int main(void)
 	HAL_TIM_OC_Start(&htim3, TIM_CHANNEL_3);
 	//HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);   // sync pulse on the P8 connector
 	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
+//	__HAL_TIM_ENABLE_IT(&htim2, TIM_IT_UPDATE);
 	HAL_TIM_OC_Start(&htim2, TIM_CHANNEL_3);      // sync pulse on the P8 connector
 
 	setTempThreshold(45);
