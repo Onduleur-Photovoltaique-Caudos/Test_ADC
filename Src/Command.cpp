@@ -28,7 +28,7 @@ void initializeCommand()
 	pSerialOutToConsole = &SerialOutToConsole;
 	pSerialInFromConsole = &SerialInFromConsole;
 	pSerialInFromConsole->initialize(pSerialOutToConsole);
-	pSerialOutToConsole->puts("\r\nReady\r\n");
+	pSerialOutToConsole->puts("\r\nReady TestADC\r\n");
 #endif
 
 }
